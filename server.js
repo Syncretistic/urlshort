@@ -1,3 +1,8 @@
+function isURL(textval) {
+    var urlregex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+    return urlregex.test(textval);
+}
+
 var express = require('express');
 var mongo = require('mongodb').MongoClient;
 var app = express();
@@ -9,10 +14,14 @@ mongo.connect('mongodb://localhost:27017/clementinejs', function(err, db) {
 		console.log('MongoDB successfully connected on port 27017.');
 	}
 	app.use('/shorten/:site(*)', function(req, res) {
+		
 		var projection = {
 			'_id': false
 		};
 		var url = req.params.site;
+		if(!isURL(url)) {
+			res.send('Enter valid URL');
+		} else {
 		var list = db.collection('list');
 		list.findOne({}, projection, function(err, result) {
 			if(err) {
@@ -61,6 +70,7 @@ mongo.connect('mongodb://localhost:27017/clementinejs', function(err, db) {
 				}
 			}
 		})
+		}
 	});
 	app.get('/check', function(req,res){
 	  var list=db.collection('list');
@@ -86,3 +96,4 @@ mongo.connect('mongodb://localhost:27017/clementinejs', function(err, db) {
 		console.log('Listening on port 8080...');
 	});
 });
+
